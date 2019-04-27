@@ -8,7 +8,9 @@ router.get('/personPost', async(ctx, next) => {
         for(let i = 0,len = result[0].length;i<len;i++){
             await userModel.findImgByPostId(result[0][i].id)
                 .then(res => {
+                   if(res.length>0){
                     result[0][i].img = res[0]['url']
+                   }
                 })
         }
         let res =  result[0].concat(result[1]).sort((a,b) => {

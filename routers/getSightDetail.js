@@ -6,6 +6,25 @@ const cralwer = require('../util/cralwer')
 
 function decodeSightDetail(res){
     let $ = cheerio.load(res.text);
+  // console.log($('.introduce-content').text())
+   //console.log($('.traffic-content').text())
+    let imgs = [];
+    $('.introduce-content').find('img').each(i => {
+        imgs.push($('.introduce-content').find('img').eq(i).attr('src'))
+    })
+    const result = {
+        bright: $('.introduce-feature').text(),
+        description: $('.toggle_l').eq(0).text(),
+        detailcon: $('.toggle_l').eq(1).text(),
+        s_sight_addr: $('span[data-reactid=45]').text(),
+        s_sight_in_list: $('.time').text(),
+        img: imgs,
+        traffic: $('.traffic-content').text()
+    }
+    return result;
+}
+function decodeSightDetail2(res){
+    let $ = cheerio.load(res.text);
     let imgs = [];
      $('.carousel-inner img').each(i => {
         imgs.push($('.carousel-inner img').eq(i).attr('src'))
@@ -20,6 +39,7 @@ function decodeSightDetail(res){
     }
     return result;
 }
+
 
 function decode2(res){
     let $ = cheerio.load(res.text);
@@ -66,7 +86,6 @@ function decodeShoppingDetail(res){
 }
 
 router.get('/getSightDetail',async(ctx,next) => {
-    console.log(decodeURIComponent(ctx.request.querystring))
     let str = ctx.request.querystring.split("&");
     let url = decodeURIComponent(str[0].substr(4));
     let type = decodeURIComponent(str[1].substr(5));
@@ -75,33 +94,64 @@ router.get('/getSightDetail',async(ctx,next) => {
     let json;
     if(type==0){
         // url = ctx.request.querystring.split('=')[1];
-    const url2 = url.replace('.html','-traffic.html')
-    decode = decodeSightDetail
-    await Promise.all([cralwer.fetUrl(url,decode),cralwer.fetUrl(url2,decode2)])
-        .then(res => {
-            if(res.length>0){
-              
-                    res[0]['traffic'] = res[1].traffic
-                ctx.body = {
-                    statusCode: 1,
-                    msg: 'success',
-                    data: res[0]
-                  }
-            }else{
-                ctx.body = {
-                    statusCode: 0,
-                    msg: '查询信息失败',
-                    data: ''
-                  }
-            }
-        }).catch(err => {
-            ctx.body = {
-                statusCode: 2,
-                msg: '服务器出错',
-                data: ''
-              }
-              console.error(err)
-        })
+        if(ctx.request.query.flag==1){
+            decode = decodeSightDetail
+           // await Promise.all([cralwer.fetUrl(url,decode),cralwer.fetUrl(url2,decode2)])
+              await cralwer.fetUrl(url,decode)
+                .then(res => {
+                    if(res!=0){
+                      
+                          //  res[0]['traffic'] = res[1].traffic
+                        ctx.body = {
+                            statusCode: 1,
+                            msg: 'success',
+                            data: res
+                          }
+                    }else{
+                        ctx.body = {
+                            statusCode: 0,
+                            msg: '查询信息失败',
+                            data: ''
+                          }
+                    }
+                }).catch(err => {
+                    ctx.body = {
+                        statusCode: 2,
+                        msg: '服务器出错',
+                        data: ''
+                      }
+                      console.error(err)
+                })
+        }else{
+            const url2 = url.replace('.html','-traffic.html')
+            decode = decodeSightDetail2
+            await Promise.all([cralwer.fetUrl(url,decode),cralwer.fetUrl(url2,decode2)])
+                .then(res => {
+                    if(res.length>0){
+                      
+                            res[0]['traffic'] = res[1].traffic
+                        ctx.body = {
+                            statusCode: 1,
+                            msg: 'success',
+                            data: res[0]
+                          }
+                    }else{
+                        ctx.body = {
+                            statusCode: 0,
+                            msg: '查询信息失败',
+                            data: ''
+                          }
+                    }
+                }).catch(err => {
+                    ctx.body = {
+                        statusCode: 2,
+                        msg: '服务器出错',
+                        data: ''
+                      }
+                      console.error(err)
+                })
+        }
+   
     }else{
         decode = type==2 ? decodeFoodDetail : decodeShoppingDetail
         url = 'https://you.ctrip.com' + url;

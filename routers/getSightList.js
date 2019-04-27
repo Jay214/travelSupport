@@ -12,12 +12,14 @@ const name = $('.list_wide_mod2').find('.rdetailbox dt a');
 const description = $('.list_wide_mod2').find('.rdetailbox .ellipsis');
 const comment = $('.list_wide_mod2').find('.rdetailbox .recomment');
 for(let i = 0,len = img.length;i<len;i++){
+  //console.log($('.rdetailbox').eq(i).find('dd').eq(1).text().length)
   let obj = {
     src: img[i].attribs.src,
     href: `https://you.ctrip.com${name[i].attribs.href}`,
     title: name[i].attribs.title,
     description: description[i].children[0].data.replace('\n',''),
-    comment: comment[i].children[0].data.replace(/\n\s+/g,'')
+    comment: comment[i].children[0].data.replace(/\n\s+/g,''),
+    flag: $('.rdetailbox').eq(i).find('dd').eq(1).text().length==54 ? 0:1
   }
   result.push(obj)
 }
@@ -75,7 +77,6 @@ async function decodeShopping(res){
   
 
 router.get('/getSightList', async(ctx, next) => {
-    console.log(ctx.request.querystring)
     let str = ctx.request.querystring.split("&");
     let name = decodeURIComponent(str[0].substr(5));
     let type = decodeURIComponent(str[1].substr(4));
@@ -97,7 +98,7 @@ router.get('/getSightList', async(ctx, next) => {
           return cralwer.fetUrl(url,decode)
            })
            .then(result => {
-               
+              // console.log('res------',result)
             if(result&&result.length>0){
              ctx.body = {
                statusCode: 1,

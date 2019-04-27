@@ -8,7 +8,7 @@ let path = require("path");  
 
 router.post('/upload', async (ctx,next) => {
         const file = ctx.request.files.img; // 获取上传文件
-        console.log('file')
+        console.log('file',ctx.request.body.i)
     const reader = fs.createReadStream(file.path); // 创建可读流
    
     const ext = file.name.split('.').pop(); // 获取上传文件扩展名

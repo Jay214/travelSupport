@@ -26,7 +26,9 @@ router.get('/getTravelList',async(ctx,next)=>{
         for(let i = 0,len = result.length;i<len;i++){
             await userModel.findImgByPostId(result[i].id)
                 .then(res => {
-                    result[i].img = res[0]['url']
+                    if(res.length>0){
+                        result[i].img = res[0]['url']
+                    }
                 })
         }
         ctx.body = {

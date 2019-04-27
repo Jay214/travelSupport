@@ -2,14 +2,16 @@ const router = require('koa-router')()
 const userModel = require('../lib/mysql')
 
 router.post('/comment', async(ctx,next) => {
-    const { uid, content, qid, moment, to_uid } = ctx.request.body;
+    const { uid, content, qid, moment, to_uid, flag } = ctx.request.body;
     try {
-        let id = await userModel.insertAnswer([uid,content,qid,moment,to_uid])
+        const inserteQuery = flag==1 ? userModel.insertComment : userModel.insertAnswer
+        await inserteQuery([uid,content,qid,moment,to_uid])
         .then(res => {
            // console.log(res)
            return res['insertId']
         })
-        await userModel.updateQusAnswer(qid)
+        const updateQuery = flag==1 ? userModel.updatePostComment : userModel.updateQusAnswer
+        await updateQuery(qid)
             .then(res => {
                 ctx.body = {
                     data: 1,
@@ -27,7 +29,9 @@ router.post('/comment', async(ctx,next) => {
 
 router.get('/getComments', async(ctx,next) => { 
    try{
-       let answers =  await userModel.findAllComments(ctx.request.query.qid)
+       const flag = ctx.request.query.flag;
+       const findQuery = flag==1 ? userModel.findAllComments : userModel.findAllAnswers
+       let answers =  await findQuery(ctx.request.query.qid)
        for(let i = 0,len = answers.length;i<len;i++){
           await userModel.finDataById(answers[i]['uid'])
             .then(res => {
@@ -44,6 +48,7 @@ router.get('/getComments', async(ctx,next) => {
                     answers[i].is_support = res.length>0 ? true : false
                 }) */
        }
+       console.log(answers)
        ctx.body = {
            data: answers,
            msg: 'success'
@@ -56,6 +61,6 @@ router.get('/getComments', async(ctx,next) => {
        }
    }
        
-
+ 
 })
 module.exports = router

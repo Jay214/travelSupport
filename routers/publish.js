@@ -24,7 +24,7 @@ router.post('/publish', async(ctx, next) => {
              await insertData([title, content, uid, moment, address, tag, type])
              .then(res => {
                 ctx.body = {
-                    res: res[0]['insertId']
+                    res: res['insertId']
                 }
              })
          }else{

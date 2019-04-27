@@ -73,6 +73,7 @@ app.use(require('./routers/triggerInfo').routes())
 app.use(require('./routers/comment').routes())
 app.use(require('./routers/personPost').routes())
 app.use(require('./routers/getCollection').routes())
+app.use(require('./routers/search').routes())
 /*
 app.use(require('./routers/share').routes())
 //个人日记
