@@ -36,6 +36,7 @@ router.get('/search', async(ctx,next) => {
     let tag = arr.indexOf(val);
     const data = {}
     try {
+      data.sight = []
         if(tag>-1&&tag<3){
         await userModel.findCityId(name)
         .then(res => {
@@ -63,6 +64,7 @@ router.get('/search', async(ctx,next) => {
             const type = val=='游记'?0:1
             await userModel.findAllPost(name,type)
                 .then(res => {
+                  res.forEach(i => { i.tag = i.tag.split(',') })
                     data.posts = res;
                 })
         }else{
@@ -73,20 +75,24 @@ router.get('/search', async(ctx,next) => {
            /*  if(data.posts.length<=0){ */
             await userModel.findPostByCityAndTag(name,val)
                 .then(res => {
+                    res.forEach(i => { i.tag = i.tag.split(',') })
                     data.posts = res
                 })
            // }
 
             await userModel.findQuestionByTag(name,val)
                 .then(res => {
+                  res.forEach(i => { i.tag = i.tag.split(',') })
                     data.questions = res
                 })
             await userModel.findPostsByName(name,val)
                 .then(res => {
+                  res.forEach(i => { i.tag = i.tag.split(',') })
                     data.posts = data.posts.concat(res)
                 })
             await userModel.findQuestionByName(name,val)
                 .then(res => {
+                  res.forEach(i => { i.tag = i.tag.split(',') })
                     data.questions = data.questions.concat(res)
                 })
         }
@@ -181,3 +187,5 @@ function decodeSight(res){
   }
     
 module.exports = router
+
+//[6, 4, -3, 5, -2, -1, 0, 1, -9]

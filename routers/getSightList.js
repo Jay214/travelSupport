@@ -29,15 +29,15 @@ return result;
 function decodeRestaurant(res){
   let result = []
   let $ = cheerio.load(res.text)
-  const list = $('.in_card li')
+  const list = $('.list_wide_mod2 .list_mod2')
 
   for(let i = 0,len = list.length;i<len;i++){
     let item = list.eq(i)
     let obj = {
       src: item.find('img').attr('data-imgurl'),
-      title: item.find('.ellipsis').eq(0).text(),
-      description: item.find('.ellipsis').eq(1).text(),
-      href: item.find('.all_link').attr('href')
+      title: item.find('.rdetailbox a').eq(0).text(),
+      description: item.find('.ellipsis').eq(0).text(),
+      href: item.find('.rdetailbox a').eq(0).attr('href')
     }
     result.push(obj)
   }
@@ -48,7 +48,7 @@ function decodeRestaurant(res){
 async function decodeShopping(res){
   let result = []
   let $ = cheerio.load(res.text)
-  const list = $('.in_card li')
+  /* const list = $('.in_card li')
 
   for(let i = 0,len = list.length;i<len;i++){
     let item = list.eq(i)
@@ -57,7 +57,17 @@ async function decodeShopping(res){
       title: item.find('.ellipsis').eq(0).text(),
       description: item.find('.ellipsis').eq(1).text(),
       href: item.find('.all_link').attr('href')
-    }
+    } */
+    const list = $('.list_wide_mod2 .list_mod2')
+
+    for(let i = 0,len = list.length;i<len;i++){
+      let item = list.eq(i)
+      let obj = {
+        src: item.find('img').attr('writing'),
+        title: item.find('.rdetailbox').eq(0).find('a').eq(0).text(),
+        description: item.find('.ellipsis').eq(0).text(),
+        href: item.find('.rdetailbox').eq(0).find('a').eq(0).attr('href')
+      }
     result.push(obj)
   }
   //console.log(result)
@@ -80,19 +90,20 @@ router.get('/getSightList', async(ctx, next) => {
     let str = ctx.request.querystring.split("&");
     let name = decodeURIComponent(str[0].substr(5));
     let type = decodeURIComponent(str[1].substr(4));
+    let page = ctx.request.query.page ? ctx.request.query.page : 1;
     console.log(type)
     await userModel.findCityId(name)
         .then(res => {
           let url = '', decode;
-          if(type=='全部'){ //景点
-             url = `https://you.ctrip.com/sight/${res[0].num}.html`;
+          if(type=='全部'||type=='景点'){ //景点
+             url = `https://you.ctrip.com/sight/${res[0].num}/s0-p${page}.html`;
              decode = decodeSight
              
           }else if(type=='购物'){   //购物
-             url = `https://you.ctrip.com/shopping/${res[0].num}.html`;
+             url = `https://you.ctrip.com/shoppinglist/${res[0].num}/s0-p${page}.html`;
              decode = decodeShopping
           }else{    //美食
-            url =  `https://you.ctrip.com/restaurant/${res[0].num}.html`;
+            url =  `https://you.ctrip.com/restaurantlist/${res[0].num}/s0-p${page}.html`;
             decode = decodeRestaurant
           }
           return cralwer.fetUrl(url,decode)

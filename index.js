@@ -74,6 +74,10 @@ app.use(require('./routers/comment').routes())
 app.use(require('./routers/personPost').routes())
 app.use(require('./routers/getCollection').routes())
 app.use(require('./routers/search').routes())
+
+
+//管理员模块
+app.use(require('./routers/admin').routes())
 /*
 app.use(require('./routers/share').routes())
 //个人日记
@@ -82,3 +86,27 @@ app.use(require('./routers/selfNote').routes()) */
 app.listen(80) 
 
 console.log(`listening on port ${config.port}`)
+
+  //{ ‘A’: 1, ‘B.A’: 2, ‘B.B’: 3, ‘CC.D.E’: 4, ‘CC.D.F’: 5}
+/*   {
+    ‘A’: 1,
+    ‘B’: {
+      ‘A’: 2,
+      ‘B’: 3,
+    },
+    ‘CC’: {
+      ‘D’: {
+        ‘E’: 4,
+        ‘F’: 5,
+      }
+    }
+  }    */
+  
+  function transform(obj){
+      let newObj = {};
+      for(let item in keys){
+          item = item.split('.');
+          for(let len = item.length;i<len;i++){}
+          newObj.item[0] = obj[item]
+      }
+  }
