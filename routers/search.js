@@ -4,33 +4,7 @@ const userModel = require('../lib/mysql')
 const cralwer = require('../util/cralwer')
 let arr =['景点','购物','美食','游记','攻略']
 
-/* findAllPost
-//查询文章
-let findAllPost = (name,type) => {
-    let _sql = `select * from posts where address like'%${name}%' and type=${type}`
-    return query(_sql)
-}
-//根据类型和标签查询文章
-let findPostWithTag = (name,type,tag) => {
-    let _sql = `select * from posts where address like'%${name}%' and type=${type} and tag like'%${tag}%'`
-    return query(_sql)
-}
-let findPostsByCity = (address) => {
-    let _sql = `select * from posts where address like'%${address}%'`
-    return query(_sql)
-}
-let findQuestionByCity = (address) => {
-    let _sql = `select * from question where address like'%${address}%'`
-    return query(_sql)
-}
-let findPostByCityAndTag = (address,tag) => {
-    let _sql = `select * from question where address like'%${address}%' and tag like'%${tag}%'`
-    return query(_sql)
-    1景点。。。
-    2文章
-    3问题
-}
- */  
+
 router.get('/search', async(ctx,next) => {
     const {name, val} = ctx.request.query;
     let tag = arr.indexOf(val);

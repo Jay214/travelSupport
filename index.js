@@ -9,6 +9,10 @@ const koaStatic = require("koa-static");  //静态资源加载中间件
 const staticCache = require('koa-static-cache')
 const koaBody = require('koa-body');
 const app = new koa();
+const cors = require('koa-cors')
+app.use(cors({
+  allowMethods: ['GET', 'POST', 'DELETE']
+}));
 app.use(koaBody({
 
     multipart: true,
