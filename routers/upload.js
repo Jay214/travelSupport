@@ -1,12 +1,10 @@
-const router = require('koa-router')();
+﻿const router = require('koa-router')();
 const userModel = require('../lib/mysql');
-const checkUser = require('../midllewares/checkUser');
-const moment = require('moment');
 const multer = require('multer');  
 const fs = require('fs')
 let path = require("path");  
-const gm = require('gm').subClass({imageMagick: true});
-
+//const gm = require('gm').subClass({imageMagick: true});
+var images = require("images");
 router.post('/upload', async (ctx,next) => {
    // console.log(ctx.request.files)
         const file = ctx.request.files.img; // 获取上传文件
@@ -17,7 +15,7 @@ router.post('/upload', async (ctx,next) => {
     const upStream = fs.createWriteStream(`public/images/${name}.${ext}`); // 创建可写流
    
     reader.pipe(upStream); // 可读流通过管道写入可写流
-    const url = `http://10.200.116.44/images/${name}.${ext}` 
+    const url = `http://192.168.43.66/images/${name}.${ext}` 
     await userModel.insertImg([url,ctx.request.body.postId])
         .then(res => {
             return ctx.body = url;
@@ -56,5 +54,26 @@ router.post('/upload', async (ctx,next) => {
     }*/
     
     
+})
+
+router.post('/upimg',async(ctx,next) => {
+    const file = ctx.request.files.file; // 获取上传文件
+    console.log(ctx.request.files.file)
+    const ext = file.name.split('.').pop(); // 获取上传文件扩展名
+    const name = Math.random().toString();
+    images(ctx.request.files.file.path)
+        .size(300)
+        .save(`public/images/${name}.${ext}`,{
+            quality: 100
+        })
+        const url = `http://10.200.116.44/images/${name}.${ext}` 
+        ctx.body = {
+            "code": 0 //0表示成功，其它失败
+            ,"msg": "" //提示信息 //一般上传失败后返回
+            ,"data": {
+              "src": url
+              ,"title": name //可选
+            }
+          }
 })
 module.exports = router;

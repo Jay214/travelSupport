@@ -7,8 +7,58 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="/layui.css"  media="all">
-  <link rel="stylesheet" href="/layui.mobile.css"  media="all">
+ <!--  <link rel="stylesheet" href="/layui.mobile.css"  media="all"> -->
+
   <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+  <style>
+    .layui-form-item{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+      .layui-input-inline{
+       flex:2;
+    }
+    .layui-icon{
+      flex: 1;
+    }
+    .layui-form-select dl dd.layui-this{
+      background: #75adff;
+    }
+    .tags li, .tag li{
+      float: left;
+      padding: 2px 4px;
+      margin: 5px 5px 0 0;
+      border-radius: 5px;
+      font-size: 13px;
+      border-top: 1px solid lightgrey;
+    }
+    .tag li{
+      background:#000;
+      color: white;
+    }
+    .active{
+      background: #000;
+      color: white;
+    }
+    .layui-btn{
+      width: 80px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 30px;
+      margin-left: -40px;
+      padding: 0;
+      position: fixed;
+      left: 50%;
+      bottom: 15px;
+      background: #75adff;
+      color: white;
+    }
+    .layui-form{
+      margin: 0 15px;
+      margin-bottom: 60px;
+    }
+  </style>
 </head>
 <body>
  
@@ -17,15 +67,88 @@
 </textarea>
  
 <div class="site-demo-button" style="margin-top: 20px;">
-  <button class="layui-btn site-demo-layedit" data-type="content">获取编辑器内容</button>
+  <!-- 时间 -->
+  
+  <!-- 地址 -->
+  <form class="layui-form">
+      <div class="layui-form-item">
+      <div class="layui-input-inline layui-icon layui-icon-log">
+          时间
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" class="layui-input" id="test1">
+        </div>
+        </div>
+      <div class="layui-form-item">
+          
+          <div class="layui-input-inline layui-icon layui-icon-location">
+          地区
+        </div>
+          <div class="layui-input-inline">
+              <select name="provid" id="provid" lay-filter="provid">
+                  <option value="">请选择省</option>
+              </select>
+          </div>
+          <div class="layui-input-inline">
+              <select name="cityid" id="cityid" lay-filter="cityid">
+                  <option value="">请选择市</option>
+              </select>
+          </div>
+      </div>
+      <div class="layui-input-inline selectTag layui-icon layui-icon-note">
+          选择标签
+      </div>
+      <div>
+          <script id="selected" type="text/html">
+            <ul class="tag">
+            {{#  layui.each(d.arr, function(index, item){ }}
+              <li>
+                {{item}}
+              </li>
+            {{#  }); }}
+            {{#  if(d.arr.length === 0){ }}
+              无数据
+            {{#  } }} 
+            </ul>
+          </script>
+        </div>
+        <div id="view2"></div>
+  </form>
+  <button class="layui-btn" data-type="content">发表</button>
 <!--   <button class="layui-btn site-demo-layedit" data-type="text">获取编辑器纯文本内容</button> -->
 <!--   <button class="layui-btn site-demo-layedit" data-type="selection">获取编辑器选中内容</button> -->
 </div>
 
+
+    <div id="view" style="display:none;"></div>
           
 <script src="/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="./assets/data.js"></script>
+<script type="text/javascript" src="./assets/province.js"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script id="demo" type="text/html">
+  <ul class='tags'>
+  {{#  layui.each(d.tags, function(index, item){ }}
+    <li id={{item.id}}>
+      {{item.name}}
+    </li>
+  {{#  }); }}
+  {{#  if(d.tags.length === 0){ }}
+    无数据
+  {{#  } }} 
+  </ul>
+</script>
 <script>
+  //地址
+  var defaults = {
+            s1: 'provid',
+            s2: 'cityid',
+            s3: 'areaid',
+            v1: null,
+            v2: null,
+            v3: null
+        };
+  var params = {}
 layui.use('layedit', function(){
   var layedit = layui.layedit
   ,$ = layui.jquery;
@@ -33,16 +156,16 @@ layui.use('layedit', function(){
   //构建一个默认的编辑器
   layedit.set({
   uploadImage: {
-    url: 'upload' //接口url
+    url: 'upimg' //接口url
     ,type: 'post' //默认post
   }
 });
   var index = layedit.build('LAY_demo1',{
-    tool: ['left', 'center', 'right', '|', 'strong','link','unlink',,'image']
+    tool: ['left', 'center', 'right', '|', 'strong', 'image']
   });
   
   //编辑器外部操作
-  var active = {
+  /* var active = {
     content: function(){
       alert(layedit.getContent(index)); //获取编辑器内容
     }
@@ -52,15 +175,111 @@ layui.use('layedit', function(){
     ,selection: function(){
       alert(layedit.getSelection(index));
     }
-  };
+  }; */
   
-  $('.site-demo-layedit').on('click', function(){
-    var type = $(this).data('type');
-    active[type] ? active[type].call(this) : '';
+  $('.layui-btn').on('click', function(){
+    params.address = $("#provid option:selected").text() + '.' + $("#cityid option:selected").text()
+    params.content = layedit.getContent(index)
+    
   });
   
  
 });
+
+//日期
+layui.use('laydate', function(){
+  var laydate = layui.laydate;
+  
+  //执行一个laydate实例
+  laydate.render({
+    elem: '#test1' //指定元素
+    ,theme: '#75adff'
+    ,done: function(val){
+      params.moment = val
+    }
+  });
+});
+
+//标签
+layui.use('layer', function(){
+  layui.use('laytpl', function(){
+  var laytpl = layui.laytpl;
+  
+//第三步：渲染模版
+var data = { //数据
+   tags: [
+      { name: '景点推荐', id: 0, choosed: 0 }, { name: '购物', id: 1, choosed: 0 }, { name: '美食', id: 2, choosed: 0 },
+      { name: '交通', id: 3, choosed: 0 }, { name: '住宿', id: 4, choosed: 0 }, { name: '自驾游', id: 5, choosed: 0 },
+      { name: '出游准备', id: 6, choosed: 0 }, { name: '游玩娱乐', id: 7, choosed: 0 }, { name: '实用贴士', id: 8, choosed: 0 },
+      { name: '人文', id: 9, choosed: 0 }, { name: '其他', id: 10, choosed: 0 }
+      ],
+}
+var getTpl = demo.innerHTML
+,view = document.getElementById('view');
+laytpl(getTpl).render(data, function(html){
+  view.innerHTML = html;
+});
+})
+
+  var layer = layui.layer;
+ var $ = layui.jquery;
+     
+  
+var tags = [];
+ $('.selectTag').click(function(){
+  layer.open({
+  title: ''
+  ,content: $('#view').html()
+  ,area: ['80%','auto']
+  ,yes: function(index){
+    params.tag = tags.join(',')
+    layui.use('laytpl', function(){
+  var laytpl = layui.laytpl;
+    var data = { //数据
+   arr: tags
+}
+var getTpl = selected.innerHTML
+,view = document.getElementById('view2');
+laytpl(getTpl).render(data, function(html){
+  view.innerHTML = html;
+});
+})
+layer.close(index);
+  }
+});   
+$('.tags').on('click', function(e){
+   if(e.target.nodeName=='LI'){
+     if(tags.length>=3&&e.target.className!='active'){
+     
+     }else{
+      e.target.className=='active'? e.target.setAttribute('class','') : e.target.setAttribute('class','active')
+      e.target.className=='active' ? tags.push(e.target.innerHTML):tags.pop()
+     }
+    
+   }
+  });
+ })
+
+
+});         
+layui.use('laytpl', function(){
+  var laytpl = layui.laytpl;
+  
+//第三步：渲染模版
+var data = { //数据
+   tags: [
+      { name: '景点推荐', id: 0, choosed: 0 }, { name: '购物', id: 1, choosed: 0 }, { name: '美食', id: 2, choosed: 0 },
+      { name: '交通', id: 3, choosed: 0 }, { name: '住宿', id: 4, choosed: 0 }, { name: '自驾游', id: 5, choosed: 0 },
+      { name: '出游准备', id: 6, choosed: 0 }, { name: '游玩娱乐', id: 7, choosed: 0 }, { name: '实用贴士', id: 8, choosed: 0 },
+      { name: '人文', id: 9, choosed: 0 }, { name: '其他', id: 10, choosed: 0 }
+      ],
+}
+var getTpl = demo.innerHTML
+,view = document.getElementById('view');
+laytpl(getTpl).render(data, function(html){
+  view.innerHTML = html;
+});
+})
 </script>
 
 </body>

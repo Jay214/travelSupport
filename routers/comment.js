@@ -63,4 +63,34 @@ router.get('/getComments', async(ctx,next) => {
        
  
 })
+
+router.get('/message', async(ctx,next) => {
+    const uid = ctx.request.query.uid;
+    const _sql = `select * from question where uid = ${uid}`
+    await userModel.query(_sql)
+        .then(res => {
+            ctx.body = res;
+        }).catch(e => {
+            ctx.response.status = 500
+            ctx.body = []
+        })
+})
+/* router.get('/message', async(ctx,next) => {
+    const { qids } = ctx.request.query;
+    let num = []
+    for(let i = 0,len = qids.length;i<len;i++){
+        const _sql = `select * from answer where id = ${qids[i]}`;
+        await userModel.query(_sql)
+            .then(res => {
+                if(res.length>0){
+                    num[i] = res[0]
+                }
+            }).catch(e => {
+                console.error('err: ',e)
+                ctx.response.status = 500
+                ctx.body = [];
+            })
+    }
+    ctx.body = num;
+}) */
 module.exports = router

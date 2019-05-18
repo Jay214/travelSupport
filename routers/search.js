@@ -6,27 +6,34 @@ let arr =['景点','购物','美食','游记','攻略']
 
 
 router.get('/search', async(ctx,next) => {
-    const {name, val} = ctx.request.query;
+    let {name, val} = ctx.request.query;
     let tag = arr.indexOf(val);
     const data = {}
+    name = name.replace('省','')
+    console.log(name)
     try {
       data.sight = []
         if(tag>-1&&tag<3){
         await userModel.findCityId(name)
         .then(res => {
-          let url = '', decode;
-          if(val=='景点'){ //景点
-             url = `https://you.ctrip.com/sight/${res[0].num}.html`;
-             decode = decodeSight
-             
-          }else if(val=='购物'){   //购物
-             url = `https://you.ctrip.com/shopping/${res[0].num}.html`;
-             decode = decodeShopping
-          }else{    //美食
-            url =  `https://you.ctrip.com/restaurant/${res[0].num}.html`;
-            decode = decodeRestaurant
+          if(res.length>0){
+            let url = '', decode;
+            if(val=='景点'){ //景点
+               url = `https://you.ctrip.com/sight/${res[0].num}.html`;
+               decode = decodeSight
+               
+            }else if(val=='购物'){   //购物
+               url = `https://you.ctrip.com/shopping/${res[0].num}.html`;
+               decode = decodeShopping
+            }else{    //美食
+              url =  `https://you.ctrip.com/restaurant/${res[0].num}.html`;
+              decode = decodeRestaurant
+            }
+            return cralwer.fetUrl(url,decode)
+          }else{
+            return 0
           }
-          return cralwer.fetUrl(url,decode)
+          
            })
            .then(result => {
             if(result&&result.length>0){
